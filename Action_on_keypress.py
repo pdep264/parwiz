@@ -5,6 +5,10 @@ Here the result is just cmdline printed.
 Also: Simple way to change text content of a label on button clicked.
 But: To make it interesting, the text reverts after set number seconds.
 Technique: could be used for flashing messages in message line.
+        # Instead of just cmdline output, the eventFilter method can be used
+        # to call other methods. Depending on key pressed viz: if event == 68
+        # [which is d on keyboard] then delete foo or whatever enacted..
+        # if obj is self and event.type() == QEvent.Type.KeyPress:
 '''
 from PyQt6.QtCore import QEvent, Qt, QTimer
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QVBoxLayout
@@ -41,19 +45,14 @@ class Window(QWidget):
         self.label.setText("Press the button")
 
     def eventFilter(self, obj, event):
-        # Instead of just cmdline output, this method can be used to call
-        # other methods. Depending on the key pressed viz: if event == 68
-        # [which is d on keyboard] then delete foo or whatever.
+        key_actions = {
+            Qt.Key.Key_D: 'D key pressed',
+            Qt.Key.Key_S: 'S key pressed',
+            Qt.Key.Key_F: 'F key pressed'
+        }
         if obj is self and event.type() == QEvent.Type.KeyPress:
-            # print("Key Pressed:", event.key())
-            if event.key() == Qt.Key.Key_D:
-                print('D key pressed')
-            elif event.key() == Qt.Key.Key_S:
-                print('S key pressed')
-            elif event.key() == Qt.Key.Key_F:
-                print('F key pressed')
-            else:
-                print('Key not identified')
+            key = event.key()
+            print(key_actions.get(key, "I don't know this key"))
             return True
         return super().eventFilter(obj, event)
 
