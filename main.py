@@ -15,6 +15,33 @@ class MainApp(QMainWindow, ui):
 
         # signals
         self.actionSave.triggered.connect(self.save_file)
+        self.actionNew.triggered.connect(self.file_new)
+
+
+
+    def modified_check(self):
+        if not self.textEdit.document().isModified:     # unmodified
+            return True
+        # otherwise the file is modified - check what to do with it
+        ret = QMessageBox.warning(self, 'Application',
+                                  'The ducument ahs been modified.\n'
+                                  'Do you want to save your changes?',
+                                  QMessageBox.StandardButton.Save |
+                                  QMessageBox.StandardButton.Discard |
+                                  QMessageBox.StandardButton.Cancel)
+        if ret == QMessageBox.StandardButton.Save:
+            return self.save_file()
+        if ret == QMessageBox.StandardButton.Discard:
+            self.textEdit.clear
+        if ret == QMessageBox.StandardButton.Cancel:
+            return False
+        return True
+
+
+    def file_new(self):
+        if self.modified_check():
+            self.textEdit.clear
+
 
     def save_file(self):
         filename = QFileDialog.getSaveFileName(self, 'Save File')
