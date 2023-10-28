@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox
 import sys
 from PyQt6.uic import loadUiType
 
-ui, _ = loadUiType('NotePadDemo.ui')
+ui, _ = loadUiType('NotePadDemo.ui')  # init instance for incoming Designer data
 
 class MainApp(QMainWindow, ui):
     def __init__(self):
@@ -10,16 +10,15 @@ class MainApp(QMainWindow, ui):
         QMainWindow.__init__(self)
         self.setupUi(self)
 
-        # Initialize the current file name as None
-        self.current_file = None
-
+        # signals
         self.actionSave.triggered.connect(self.save_file)
         self.actionNew.triggered.connect(self.file_new)
 
     def modified_check(self):
-        if not self.textEdit.document().isModified():
+        if not self.textEdit.document().isModified():  # unmodified
             return True
 
+        # otherwise the file is modified - check what to do with it
         ret = QMessageBox.warning(self, 'Application',
                                   'The document has been modified.\n'
                                   'Do you want to save your changes?',
@@ -30,6 +29,7 @@ class MainApp(QMainWindow, ui):
         if ret == QMessageBox.StandardButton.Save:
             return self.save_file()
         elif ret == QMessageBox.StandardButton.Discard:
+            # clear text edit
             self.textEdit.clear()
         elif ret == QMessageBox.StandardButton.Cancel:
             return False
@@ -39,26 +39,14 @@ class MainApp(QMainWindow, ui):
     def file_new(self):
         if self.modified_check():
             self.textEdit.clear()
-            # Reset the current file name
-            self.current_file = None
 
     def save_file(self):
-        if self.current_file is None:
-            # If no current file name exists, prompt for one
-            filename, _ = QFileDialog.getSaveFileName(self, 'Save File')
-            if not filename:
-                return
-            self.current_file = filename
-        else:
-            # If a current file name exists, use it
-            filename = self.current_file
-
-        with open(filename, 'w') as f:
-            text = self.textEdit.toPlainText()
-            f.write(text)
-        # Update the status and show a message
-        self.textEdit.document().setModified(False)
-        QMessageBox.about(self, 'Save File', 'File has been saved')
+        filename, _ = QFileDialog.getSaveFileName(self, 'Save File')
+        if filename:
+            with open(filename, 'w') as f:
+                text = self.textEdit.toPlainText()
+                f.write(text)
+            QMessageBox.about(self, 'Save File', 'File has been saved')
 
 def main():
     app = QApplication(sys.argv)
